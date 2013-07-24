@@ -36,8 +36,8 @@ frontend https
 <% end -%>
 
 backend servers-http
-  <% @node['haproxy']['members'].each do |member| -%>
-  server <%= member[:hostname] %> <%= member[:ipaddress] %>:<%= member[:port] || node['haproxy']['member_port'] %> weight 1 maxconn <%= node['haproxy']['member_max_connections'] %> check
+  <% node['haproxy']['members'].each do |member| -%>
+  server <%= member['hostname'] %> <%= member['ipaddress'] %>:<%= member['port'] || node['haproxy']['member_port'] %> weight <%= member['weight'] || node['haproxy']['member_weight'] %> maxconn <%= member['max_connections'] || node['haproxy']['member_max_connections'] %> check
   <% end -%>
   <% if node["haproxy"]["httpchk"] -%>
   option httpchk <%= node["haproxy"]["httpchk"] %>
@@ -47,8 +47,8 @@ backend servers-http
 backend servers-https
   mode tcp
   option ssl-hello-chk
-  <% @node['haproxy']['members'].each do |member| -%>
-  server <%= member[:hostname] %> <%= member[:ipaddress] %>:<%= member[:port] || node['haproxy']['ssl_member_port'] %> weight 1 maxconn <%= node['haproxy']['member_max_connections'] %> check
+  <% node['haproxy']['members'].each do |member| -%>
+  server <%= member['hostname'] %> <%= member['ipaddress'] %>:<%= member['ssl_port'] || node['haproxy']['ssl_member_port'] %> weight <%= member['weight'] || node['haproxy']['member_weight'] %> maxconn <%= member['max_connections'] || node['haproxy']['member_max_connections'] %> check
   <% end -%>
   <% if node["haproxy"]["ssl_httpchk"] -%>
   option httpchk <%= node["haproxy"]["ssl_httpchk"] %>

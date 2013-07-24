@@ -24,16 +24,19 @@ Attributes
   [{
     "hostname" => "localhost",
     "ipaddress" => "127.0.0.1",
-    "port" => "4000"
+    "port" => 4000,
+    "ssl_port" => 4000
   }, {
     "hostname" => "localhost",
     "ipaddress" => "127.0.0.1",
-    "port" => "4001"
+    "port" => 4001,
+    "ssl_port" => 4001
   }]
   ```
 
 * `node['haproxy']['member_port']` - the port that member systems will
   be listening on if not otherwise specified in the members attribute, default 8080
+* `node['haproxy']['member_weight']` - the weight to apply to member systems if not otherwise specified in the members attribute, default 1
 * `node['haproxy']['app_server_role']` - used by the `app_lb` recipe
   to search for a specific role of member systems. Default
   `webserver`.
@@ -73,7 +76,7 @@ Attributes
   X-Forwarded-For header containing the original client's IP address.
   This option disables KeepAlive.
 * `node['haproxy']['member_max_connections']` - the maxconn value to
-  be set for each app server
+  be set for each app server if not otherwise specified in the members attribute
 * `node['haproxy']['user']` - user that haproxy runs as
 * `node['haproxy']['group']` - group that haproxy runs as
 * `node['haproxy']['global_max_connections']` - in the `app_lb`
@@ -143,37 +146,55 @@ Use either the default recipe or the `app_lb` recipe.
 
 When using the default recipe, the members attribute specifies the application servers.
 
-    "haproxy" => {
-      "members" => [{
-        "hostname" => "appserver1",
-        "ipaddress" => "123.123.123.1",
-        "port" => "4000"
-      }, {
-        "hostname" => "appserver2",
-        "ipaddress" => "123.123.123.2",
-        "port" => "4000"
-      }, {
-        "hostname" => "appserver3",
-        "ipaddress" => "123.123.123.3",
-        "port" => "4000"
-      }]
-    }
+```ruby
+"haproxy" => {
+  "members" => [{
+    "hostname" => "appserver1",
+    "ipaddress" => "123.123.123.1",
+    "port" => 8000,
+    "ssl_port" => 8443,
+    "weight" => 1,
+    "max_connections" => 100
+  }, {
+    "hostname" => "appserver2",
+    "ipaddress" => "123.123.123.2",
+    "port" => 8000,
+    "ssl_port" => 8443,
+    "weight" => 1,
+    "max_connections" => 100
+  }, {
+    "hostname" => "appserver3",
+    "ipaddress" => "123.123.123.3",
+    "port" => 8000,
+    "ssl_port" => 8443,
+    "weight" => 1,
+    "max_connections" => 100
+  }]
+}
+```
 
-Note that the `port` attribute is optional and will default to the value of `node['haproxy']['member_port']`
+Note that the following attributes are optional
+
+* `port` will default to the value of `node['haproxy']['member_port']`
+* `ssl_port` will default to the value of `node['haproxy']['ssl_member_port']`
+* `weight` will default to the value of `node['haproxy']['member_weight']`
+* `max_connections` will default to the value of `node['haproxy']['member_max_connections']`
 
 The `app_lb` recipe is designed to be used with the application
 cookbook, and provides search mechanism to find the appropriate
 application servers. Set this in a role that includes the
 haproxy::app_lb recipe. For example,
 
-    name "load_balancer"
-    description "haproxy load balancer"
-    run_list("recipe[haproxy::app_lb]")
-    override_attributes(
-      "haproxy" => {
-        "app_server_role" => "webserver"
-      }
-    )
+```ruby
+name "load_balancer"
+description "haproxy load balancer"
+run_list("recipe[haproxy::app_lb]")
+override_attributes(
+  "haproxy" => {
+    "app_server_role" => "webserver"
+  }
+)
+```
 
 The search uses the node's `chef_environment`. For example, create
 `environments/production.rb`, then upload it to the server with knife
