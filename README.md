@@ -20,17 +20,17 @@ Attributes
   listens
 * `node['haproxy']['members']` - used by the default recipe to specify the member systems to add. Default
 
-```
-[{
-  "hostname" => "localhost",
-  "ipaddress" => "127.0.0.1",
-  "port" => "4000"
-}, {
-  "hostname" => "localhost",
-  "ipaddress" => "127.0.0.1",
-  "port" => "4001"
-}]
-```
+  ```ruby
+  [{
+    "hostname" => "localhost",
+    "ipaddress" => "127.0.0.1",
+    "port" => "4000"
+  }, {
+    "hostname" => "localhost",
+    "ipaddress" => "127.0.0.1",
+    "port" => "4001"
+  }]
+  ```
 
 * `node['haproxy']['member_port']` - the port that member systems will
   be listening on if not otherwise specified in the members attribute, default 8080
